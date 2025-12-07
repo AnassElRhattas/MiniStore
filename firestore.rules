@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        request.auth.uid in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.uid;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Products collection - public read, admin write
+    match /products/{productId} {
+      allow read: if true; // Anyone can read products
+      allow create, update, delete: if isAdmin(); // Only admins can modify products
+    }
+    
+    // Orders collection - authenticated users can create and read their own, admin can manage all
+    match /orders/{orderId} {
+      allow create: if true; // Anyone can create orders (anonymous users)
+      allow read: if resource.data.userId == request.auth.uid || isAdmin();
+      allow update: if isAdmin(); // Only admins can update order status
+      allow delete: if isAdmin(); // Only admins can delete orders
+    }
+    
+    // Admins collection - only existing admins can read and manage
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false; // Admin creation should be done manually in Firebase Console
+    }
+    
+    // Users collection (if needed for user profiles)
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isAdmin();
+    }
+  }
+}

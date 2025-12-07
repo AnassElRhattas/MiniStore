@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Product images - public read, admin write
+    match /products/{allPaths=**} {
+      allow read: if true; // Anyone can read product images
+      allow write: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.uid; // Only admins can upload/modify
+    }
+    
+    // Default rule - deny all access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
