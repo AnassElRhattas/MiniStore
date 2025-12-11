@@ -6,6 +6,7 @@ import { OrderSuccessPage } from "@/pages/OrderSuccessPage";
 import { AdminLogin } from "@/pages/AdminLogin";
 import { AdminOrdersPage } from "@/pages/AdminOrdersPage";
 import { AdminProductsPage } from "@/pages/AdminProductsPage";
+import { AdminProductDetailPage } from "@/pages/AdminProductDetailPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminLayout } from "@/components/AdminLayout";
 import { ProductDetail } from "@/components/ProductDetail";
@@ -36,6 +37,16 @@ export default function App() {
             <ProtectedRoute>
               <AdminLayout>
                 <AdminProductsPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/:id"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <AdminProductDetailPage />
               </AdminLayout>
             </ProtectedRoute>
           }

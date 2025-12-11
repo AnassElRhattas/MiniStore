@@ -5,18 +5,22 @@ import { ordersService } from '../services/orders';
 import { Order } from '../types';
 
 export const OrderSuccessPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!id) return;
+      if (!orderId) {
+        setError('Order ID manquant');
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
-        const orderData = await ordersService.getOrderById(id);
+        const orderData = await ordersService.getOrderById(orderId);
         if (orderData) {
           setOrder(orderData);
         } else {
@@ -31,7 +35,7 @@ export const OrderSuccessPage: React.FC = () => {
     };
 
     fetchOrder();
-  }, [id]);
+  }, [orderId]);
 
   if (loading) {
     return (

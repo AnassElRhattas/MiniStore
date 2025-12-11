@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { productsService } from '../services/products';
 import { Product } from '../types';
-import { Plus, Edit, Trash2, Image as ImageIcon, Package, Check, X, Search, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Image as ImageIcon, Package, Check, X, Search, Filter, Upload, Eye } from 'lucide-react';
 
 export const AdminProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -80,6 +82,22 @@ export const AdminProductsPage: React.FC = () => {
     setShowForm(false);
     setEditingProduct(null);
     setFormData({ name: '', description: '', price: 0, stock: 0, imageUrl: '' });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImageLoading(true);
+      const url = await productsService.uploadProductImage(file);
+      setFormData(prev => ({ ...prev, imageUrl: url }));
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      alert('Failed to upload image');
+    } finally {
+      setImageLoading(false);
+    }
   };
 
   if (loading) {
@@ -231,18 +249,49 @@ export const AdminProductsPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                     <div className="flex gap-4">
-                      <div className="flex-1">
-                        <input
-                          type="url"
-                          value={formData.imageUrl}
-                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                          placeholder="https://example.com/image.jpg"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Enter a direct link to the product image</p>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex gap-2">
+                          <input
+                            type="url"
+                            value={formData.imageUrl}
+                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
+                        
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-200"></div>
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-white px-2 text-gray-500">Or upload image</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-center w-full">
+                          <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 ${imageLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              {imageLoading ? (
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                              ) : (
+                                <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                              )}
+                              <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span></p>
+                              <p className="text-xs text-gray-500">PNG, JPG or WEBP</p>
+                            </div>
+                            <input 
+                              type="file" 
+                              className="hidden" 
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              disabled={imageLoading}
+                            />
+                          </label>
+                        </div>
                       </div>
                       {formData.imageUrl && (
-                        <div className="w-16 h-16 rounded-lg border border-gray-200 overflow-hidden flex-shrink-0">
+                        <div className="w-32 h-32 rounded-lg border border-gray-200 overflow-hidden flex-shrink-0 bg-gray-50">
                           <img 
                             src={formData.imageUrl} 
                             alt="Preview" 
@@ -362,6 +411,13 @@ export const AdminProductsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-3">
+                        <Link
+                          to={`/admin/products/${product.id}`}
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                          title="View details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
                         <button
                           onClick={() => handleEdit(product)}
                           className="text-gray-400 hover:text-blue-600 transition-colors"

@@ -5,6 +5,7 @@ import { Product } from '../types';
 import { productsService } from '../services/products';
 import { useCart } from '../contexts/CartContext';
 import { ProductGrid } from './ProductGrid';
+import { ProductReviews } from './ProductReviews';
 
 export const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -193,6 +194,8 @@ export const ProductDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ProductReviews productId={product.id} />
 
       {relatedProducts.length > 0 && (
         <div className="mt-12">

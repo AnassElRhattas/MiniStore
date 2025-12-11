@@ -1,5 +1,6 @@
-import { db } from '../firebase/config';
+import { db, storage } from '../firebase/config';
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types';
 
 const PRODUCTS_COLLECTION = 'products';
@@ -82,6 +83,18 @@ export const productsService = {
       await deleteDoc(doc(db, PRODUCTS_COLLECTION, id));
     } catch (error) {
       console.error('Error deleting product:', error);
+      throw error;
+    }
+  },
+
+  async uploadProductImage(file: File): Promise<string> {
+    try {
+      const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
       throw error;
     }
   },

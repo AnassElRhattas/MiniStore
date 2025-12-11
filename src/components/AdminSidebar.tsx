@@ -25,11 +25,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
       {/* Sidebar */}
       <div className={`
         fixed inset-y-0 left-0 z-30
-        w-64 bg-slate-900 min-h-screen flex flex-col text-white border-r border-slate-800
+        w-64 bg-white min-h-screen flex flex-col text-gray-900 border-r border-gray-200 shadow-sm
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 shadow flex justify-between items-start">
+        <div className="p-6 bg-gradient-to-r from-indigo-600 to-purple-600 shadow-md flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
               <Store className="w-6 h-6 text-white" />
@@ -49,10 +49,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
           <Link
             to="/admin/orders"
             onClick={() => onClose()}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               isActive('/admin/orders')
-                ? 'bg-white/5 text-white border-l-2 border-blue-500'
-                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                ? 'bg-indigo-50 text-indigo-700 border-l-2 border-indigo-600'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
             }`}
             aria-current={isActive('/admin/orders') ? 'page' : undefined}
           >
@@ -63,10 +63,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
           <Link
             to="/admin/products"
             onClick={() => onClose()}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               isActive('/admin/products')
-                ? 'bg-white/5 text-white border-l-2 border-blue-500'
-                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                ? 'bg-indigo-50 text-indigo-700 border-l-2 border-indigo-600'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
             }`}
             aria-current={isActive('/admin/products') ? 'page' : undefined}
           >
@@ -75,17 +75,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, onClose }) =
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-gray-200">
           <Link
             to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-colors mb-2"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors mb-2"
           >
             <Store className="w-5 h-5" />
             View Store
           </Link>
           <button
             onClick={() => authService.logout()}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-white/5 hover:text-red-300 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
           >
             <LogOut className="w-5 h-5" />
             Logout

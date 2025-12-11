@@ -1,5 +1,5 @@
 import { db } from '../firebase/config';
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, query, orderBy, serverTimestamp, runTransaction } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, query, orderBy, serverTimestamp, runTransaction, onSnapshot } from 'firebase/firestore';
 import { Order, OrderStatus, CartItem, ClientInfo } from '../types';
 
 const ORDERS_COLLECTION = 'orders';
@@ -128,6 +128,22 @@ export const ordersService = {
       console.error('Error getting order:', error);
       throw error;
     }
+  },
+
+  subscribeToOrders(callback: (orders: Order[]) => void) {
+    const q = query(collection(db, ORDERS_COLLECTION), orderBy('createdAt', 'desc'));
+    
+    return onSnapshot(q, (snapshot) => {
+      const orders = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+      } as Order));
+      
+      callback(orders);
+    }, (error) => {
+      console.error('Error subscribing to orders:', error);
+    });
   },
 };
 

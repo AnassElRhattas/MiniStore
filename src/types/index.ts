@@ -37,3 +37,12 @@ export interface Order {
 }
 
 export type OrderStatus = 'pending' | 'paid' | 'preparing' | 'shipped' | 'done';
+
+export interface Review {
+  id: string;
+  productId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: Date;
+}

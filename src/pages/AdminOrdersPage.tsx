@@ -99,7 +99,7 @@ export const AdminOrdersPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-200">
       <div className="p-6 border-b border-gray-100">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Order Management</h1>
         
@@ -110,7 +110,7 @@ export const AdminOrdersPage: React.FC = () => {
               key={status}
               className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
                 statusFilter === status 
-                  ? 'bg-blue-50 border-blue-200 shadow-sm' 
+                  ? 'bg-blue-50 border-blue-200 shadow-sm ring-1 ring-blue-100' 
                   : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200'
               }`}
               onClick={() => setStatusFilter(status as OrderStatus)}
@@ -125,7 +125,7 @@ export const AdminOrdersPage: React.FC = () => {
           <div
             className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
               statusFilter === 'all' 
-                ? 'bg-blue-50 border-blue-200 shadow-sm' 
+                ? 'bg-blue-50 border-blue-200 shadow-sm ring-1 ring-blue-100' 
                 : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200'
             }`}
             onClick={() => setStatusFilter('all')}
@@ -177,9 +177,9 @@ export const AdminOrdersPage: React.FC = () => {
             <p className="text-sm text-gray-400 mt-1">Try changing the filter or refresh the list</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[calc(100vh-280px)] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50/50">
+              <thead className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Order ID

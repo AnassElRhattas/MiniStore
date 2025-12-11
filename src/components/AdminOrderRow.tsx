@@ -8,10 +8,10 @@ interface AdminOrderRowProps {
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
-  paid: 'bg-green-100 text-green-800',
-  preparing: 'bg-blue-100 text-blue-800',
-  shipped: 'bg-purple-100 text-purple-800',
-  done: 'bg-gray-100 text-gray-800',
+  paid: 'bg-blue-100 text-blue-800',
+  preparing: 'bg-purple-100 text-purple-800',
+  shipped: 'bg-indigo-100 text-indigo-800',
+  done: 'bg-green-100 text-green-800',
 };
 
 const statusOptions: OrderStatus[] = ['pending', 'paid', 'preparing', 'shipped', 'done'];
