@@ -61,6 +61,22 @@ describe('CartContext', () => {
       expect(result.current.getTotalPrice()).toBe(10.99);
     });
 
+    it('should treat different color variants as different items', () => {
+      const { result } = renderHook(() => useCart(), { wrapper });
+      const red = { name: 'Rouge', hex: '#ff0000', imageUrl: 'red.jpg' };
+      const blue = { name: 'Bleu', hex: '#0000ff', imageUrl: 'blue.jpg' };
+      
+      act(() => {
+        result.current.addItem(mockProduct, 1, red);
+        result.current.addItem(mockProduct, 2, blue);
+      });
+      
+      expect(result.current.items).toHaveLength(2);
+      expect(result.current.items.find(i => i.variant?.name === 'Rouge')?.quantity).toBe(1);
+      expect(result.current.items.find(i => i.variant?.name === 'Bleu')?.quantity).toBe(2);
+      expect(result.current.getTotalItems()).toBe(3);
+    });
+
     it('should increase quantity for existing item', () => {
       const { result } = renderHook(() => useCart(), { wrapper });
       
@@ -120,6 +136,21 @@ describe('CartContext', () => {
 
       expect(result.current.items).toHaveLength(0);
     });
+
+    it('should remove only the selected variant', () => {
+      const { result } = renderHook(() => useCart(), { wrapper });
+      const red = { name: 'Rouge', hex: '#ff0000', imageUrl: 'red.jpg' };
+      const blue = { name: 'Bleu', hex: '#0000ff', imageUrl: 'blue.jpg' };
+      
+      act(() => {
+        result.current.addItem(mockProduct, 1, red);
+        result.current.addItem(mockProduct, 1, blue);
+        result.current.removeItem(mockProduct.id, 'Rouge');
+      });
+      
+      expect(result.current.items).toHaveLength(1);
+      expect(result.current.items[0].variant?.name).toBe('Bleu');
+    });
   });
 
   describe('updateQuantity', () => {
@@ -134,6 +165,21 @@ describe('CartContext', () => {
       expect(result.current.items.find(i => i.product.id === mockProduct.id)?.quantity).toBe(3);
       expect(result.current.getTotalItems()).toBe(3);
       expect(result.current.getTotalPrice()).toBe(32.97);
+    });
+
+    it('should update quantity for a specific variant', () => {
+      const { result } = renderHook(() => useCart(), { wrapper });
+      const red = { name: 'Rouge', hex: '#ff0000', imageUrl: 'red.jpg' };
+      const blue = { name: 'Bleu', hex: '#0000ff', imageUrl: 'blue.jpg' };
+      
+      act(() => {
+        result.current.addItem(mockProduct, 1, red);
+        result.current.addItem(mockProduct, 1, blue);
+        result.current.updateQuantity(mockProduct.id, 4, 'Bleu');
+      });
+      
+      expect(result.current.items.find(i => i.variant?.name === 'Rouge')?.quantity).toBe(1);
+      expect(result.current.items.find(i => i.variant?.name === 'Bleu')?.quantity).toBe(4);
     });
 
     it('should remove item if quantity is 0', () => {

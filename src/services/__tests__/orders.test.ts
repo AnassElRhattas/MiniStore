@@ -51,6 +51,7 @@ const mockClientInfo: ClientInfo = {
   name: 'John Doe',
   phone: '+1234567890',
   address: '123 Main St, City, Country',
+  city: 'El Jadida',
 };
 
 const mockOrder: Order = {
@@ -120,7 +121,7 @@ describe('Orders Service', () => {
       });
 
       await expect(createOrder(mockCartItems, mockClientInfo)).rejects.toThrow(
-        'Insufficient stock for product: Test Product 1'
+        'Stock insuffisant pour : Test Product 1'
       );
 
       expect(runTransaction).toHaveBeenCalled();
@@ -140,7 +141,7 @@ describe('Orders Service', () => {
       });
 
       await expect(createOrder(mockCartItems, mockClientInfo)).rejects.toThrow(
-        'Product not found: Test Product 1'
+        'Produit introuvable : Test Product 1'
       );
 
       expect(runTransaction).toHaveBeenCalled();
@@ -149,7 +150,7 @@ describe('Orders Service', () => {
 
     it('should handle empty cart', async () => {
       await expect(createOrder([], mockClientInfo)).rejects.toThrow(
-        'Cart is empty'
+        'Le panier est vide.'
       );
     });
 
@@ -181,6 +182,35 @@ describe('Orders Service', () => {
       
       // Verify that the order data contains the correct total
       const setCall = mockTransaction.set.mock.calls[0];
+      expect(setCall[1].total).toBeCloseTo(expectedTotal, 2);
+    });
+
+    it('should add shipping fee for non free-shipping cities', async () => {
+      const mockTransaction = {
+        get: vi.fn().mockResolvedValue({
+          exists: vi.fn().mockReturnValue(true),
+          data: vi.fn().mockReturnValue({ stock: 10 }),
+        }),
+        update: vi.fn(),
+        set: vi.fn(),
+      };
+
+      const mockDocRef = { id: 'order-123' };
+      (doc as any).mockReturnValue(mockDocRef);
+      (runTransaction as any).mockImplementation(async (db, callback) => {
+        return callback(mockTransaction);
+      });
+
+      (getDoc as any).mockResolvedValue({
+        id: mockDocRef.id,
+        data: () => ({ createdAt: { toDate: () => new Date() } }),
+      });
+
+      await createOrder(mockCartItems, { ...mockClientInfo, city: 'Casablanca' });
+
+      const setCall = mockTransaction.set.mock.calls[0];
+      expect(setCall[1].shippingFee).toBe(35);
+      const expectedTotal = 2 * 10.99 + 1 * 15.99 + 35;
       expect(setCall[1].total).toBeCloseTo(expectedTotal, 2);
     });
   });
@@ -271,7 +301,7 @@ describe('Orders Service', () => {
       const invalidStatus = 'invalid-status' as OrderStatus;
 
       await expect(updateOrderStatus('order-123', invalidStatus)).rejects.toThrow(
-        'Invalid order status: invalid-status'
+        'Statut de commande invalide : invalid-status'
       );
 
       expect(updateDoc).not.toHaveBeenCalled();
@@ -375,7 +405,7 @@ describe('Orders Service', () => {
       // Second order with quantity > remaining stock should fail
       const cartItems2: CartItem[] = [{ product: product1, quantity: 3 }];
       await expect(createOrder(cartItems2, mockClientInfo)).rejects.toThrow(
-        'Insufficient stock for product: Test Product 1'
+        'Stock insuffisant pour : Test Product 1'
       );
       expect(stockCount).toBe(2); // Stock unchanged
 

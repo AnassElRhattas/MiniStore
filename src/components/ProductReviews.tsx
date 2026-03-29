@@ -57,7 +57,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
       setComment('');
       setShowForm(false);
     } catch (err) {
-      setError('Failed to submit review. Please try again.');
+      setError("Impossible d'envoyer votre avis. Veuillez réessayer.");
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -93,7 +93,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
           >
             Donner mon avis
           </button>
@@ -121,7 +121,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
                     key={star}
                     type="button"
                     onClick={() => setRating(star)}
-                    className="focus:outline-none transition-transform hover:scale-110"
+                    className="transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-lg"
                   >
                     <Star
                       className={`w-8 h-8 ${
@@ -167,7 +167,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl transition-colors font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
                 disabled={submitting}
               >
                 Annuler
@@ -175,7 +175,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-bold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
               >
                 {submitting ? 'Envoi...' : 'Publier l\'avis'}
               </button>
@@ -218,7 +218,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
                   {review.createdAt.toLocaleDateString()}
                 </span>
               </div>
-              <p className="text-gray-600 mt-2 ml-13 pl-13 md:pl-0 md:ml-13 leading-relaxed">
+              <p className="text-gray-600 mt-2 leading-relaxed">
                 {review.comment}
               </p>
             </div>

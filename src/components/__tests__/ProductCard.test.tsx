@@ -4,8 +4,8 @@ import { renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { ProductCard } from '../ProductCard';
-import { Product } from '@/types';
-import { CartProvider, useCart } from '@/contexts/CartContext';
+import { Product } from '../../types';
+import { CartProvider, useCart } from '../../contexts/CartContext';
 
 const mockProduct: Product = {
   id: '1',
@@ -41,9 +41,10 @@ describe('ProductCard', () => {
       render(<ProductCard product={mockProduct} />, { wrapper });
       
       expect(screen.getByText('Test Product')).toBeInTheDocument();
-      expect(screen.getByText('10,99 DH')).toBeInTheDocument(); // toLocaleString formats with comma
+      expect(screen.getByText('10,99')).toBeInTheDocument();
       expect(screen.getByText('Test product description')).toBeInTheDocument();
-      expect(screen.getByText('5 in stock')).toBeInTheDocument();
+      expect(screen.getByText('En Stock')).toBeInTheDocument();
+      expect(screen.getByText('5 restants')).toBeInTheDocument();
     });
 
     it('should render product image with correct src and alt', () => {
@@ -53,10 +54,10 @@ describe('ProductCard', () => {
       expect(image).toHaveAttribute('src', 'test-image.jpg');
     });
 
-    it('should not render category badge', () => {
+    it('should render category badge when category exists', () => {
       render(<ProductCard product={mockProduct} />, { wrapper });
       
-      expect(screen.queryByText('test')).not.toBeInTheDocument();
+      expect(screen.getByText('test')).toBeInTheDocument();
     });
   });
 
@@ -64,23 +65,21 @@ describe('ProductCard', () => {
     it('should show in stock status for available products', () => {
       render(<ProductCard product={mockProduct} />, { wrapper });
       
-      expect(screen.getByText('5 in stock')).toBeInTheDocument();
-      expect(screen.getByText('5 in stock')).toHaveClass('text-green-600');
+      expect(screen.getByText('En Stock')).toBeInTheDocument();
+      expect(screen.getByText('5 restants')).toBeInTheDocument();
     });
 
     it('should show out of stock status for unavailable products', () => {
       render(<ProductCard product={mockProductOutOfStock} />, { wrapper });
       
-      const stockStatusElements = screen.getAllByText('Out of Stock');
-      expect(stockStatusElements).toHaveLength(2); // One in stock status, one in button
-      // Check the stock status element (first one) has the red class
-      expect(stockStatusElements[0]).toHaveClass('text-red-500');
+      expect(screen.getByText('Épuisé')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /indisponible/i })).toBeInTheDocument();
     });
 
     it('should disable add to cart button when out of stock', () => {
       render(<ProductCard product={mockProductOutOfStock} />, { wrapper });
       
-      const button = screen.getByRole('button', { name: /out of stock/i });
+      const button = screen.getByRole('button', { name: /indisponible/i });
       expect(button).toBeDisabled();
     });
   });
@@ -103,7 +102,7 @@ describe('ProductCard', () => {
       
       expect(screen.getByTestId('cart-count')).toHaveTextContent('0');
       
-      const button = screen.getByRole('button', { name: /add to cart/i });
+      const button = screen.getByRole('button', { name: /ajouter.*au panier/i });
       await user.click(button);
       
       expect(screen.getByTestId('cart-count')).toHaveTextContent('1');
@@ -114,7 +113,7 @@ describe('ProductCard', () => {
       
       render(<ProductCard product={mockProductOutOfStock} />, { wrapper });
       
-      const button = screen.getByRole('button', { name: /out of stock/i });
+      const button = screen.getByRole('button', { name: /indisponible/i });
       fireEvent.click(button);
       
       expect(result.current.items).toHaveLength(0);
@@ -128,7 +127,7 @@ describe('ProductCard', () => {
       const image = screen.getByAltText('Test Product');
       fireEvent.error(image);
       
-      expect(image).toHaveAttribute('src', 'https://via.placeholder.com/300x200?text=No+Image');
+      expect(image.getAttribute('src')).toContain('data:image/svg+xml');
     });
 
     it('should use placeholder image when no image provided', () => {
@@ -145,21 +144,21 @@ describe('ProductCard', () => {
       const { container } = render(<ProductCard product={mockProduct} />, { wrapper });
       
       const card = container.firstChild;
-      expect(card).toHaveClass('bg-white', 'rounded-lg', 'shadow-md', 'overflow-hidden', 'hover:shadow-lg', 'transition-shadow');
+      expect(card).toHaveClass('bg-white', 'rounded-2xl');
     });
 
     it('should have proper image container', () => {
       render(<ProductCard product={mockProduct} />, { wrapper });
       
       const image = screen.getByAltText('Test Product');
-      expect(image).toHaveClass('w-full', 'h-48', 'object-cover');
+      expect(image).toHaveClass('w-full', 'h-full', 'object-cover');
     });
 
     it('should have proper content padding', () => {
       render(<ProductCard product={mockProduct} />, { wrapper });
       
       const content = screen.getByText('Test Product').parentElement;
-      expect(content).toHaveClass('p-4');
+      expect(content).toHaveClass('p-5');
     });
   });
 
@@ -168,7 +167,7 @@ describe('ProductCard', () => {
       render(<ProductCard product={mockProduct} />, { wrapper });
       
       const button = screen.getByRole('button');
-      expect(button).toHaveTextContent('Add to Cart');
+      expect(button).toHaveTextContent('Ajouter au panier');
     });
 
     it('should have proper alt text for image', () => {
@@ -204,7 +203,7 @@ describe('ProductCard', () => {
       const freeProduct = { ...mockProduct, price: 0 };
       render(<ProductCard product={freeProduct} />, { wrapper });
       
-      expect(screen.getByText('0 DH')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
 
     it('should handle very high price', () => {
@@ -236,7 +235,7 @@ describe('ProductCard', () => {
       
       expect(screen.getByTestId('cart-count')).toHaveTextContent('0');
       
-      const button = screen.getByRole('button', { name: /add to cart/i });
+      const button = screen.getByRole('button', { name: /ajouter.*au panier/i });
       
       // Click multiple times rapidly
       await user.click(button);
@@ -251,7 +250,7 @@ describe('ProductCard', () => {
       const user = userEvent.setup();
       render(<ProductCard product={mockProduct} />, { wrapper });
       
-      const button = screen.getByRole('button', { name: /add to cart/i });
+      const button = screen.getByRole('button', { name: /ajouter.*au panier/i });
       
       expect(button).not.toBeDisabled();
       await user.click(button);

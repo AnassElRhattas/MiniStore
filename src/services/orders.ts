@@ -1,17 +1,32 @@
 import { db } from '../firebase/config';
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, query, orderBy, serverTimestamp, runTransaction, onSnapshot } from 'firebase/firestore';
-import { Order, OrderStatus, CartItem, ClientInfo } from '../types';
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, query, orderBy, serverTimestamp, runTransaction, onSnapshot, increment } from 'firebase/firestore';
+import { Order, OrderStatus, CartItem, ClientInfo, PromoCode } from '../types';
+import { getShippingFee } from '../utils/shipping';
 
 const ORDERS_COLLECTION = 'orders';
 const PRODUCTS_COLLECTION = 'products';
+const PROMO_COLLECTION = 'promo_codes';
 
 export const ordersService = {
-  async createOrder(clientInfo: ClientInfo, cartItems: CartItem[]): Promise<Order> {
+  async createOrder(clientInfo: ClientInfo, cartItems: CartItem[], promoCode: PromoCode | null = null): Promise<Order> {
     try {
       if (!cartItems || cartItems.length === 0) {
-        throw new Error('Cart is empty');
+        throw new Error('Le panier est vide.');
       }
-      const total = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      
+      const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      let discount = 0;
+
+      if (promoCode) {
+        if (promoCode.discountType === 'percentage') {
+          discount = (subtotal * promoCode.discountValue) / 100;
+        } else {
+          discount = Math.min(promoCode.discountValue, subtotal);
+        }
+      }
+
+      const shippingFee = getShippingFee(clientInfo.city);
+      const total = subtotal - discount + shippingFee;
       
       const orderData = {
         client: clientInfo,
@@ -20,8 +35,14 @@ export const ordersService = {
           name: item.product.name,
           price: item.product.price,
           quantity: item.quantity,
+          variantName: item.variant?.name || null,
+          variantHex: item.variant?.hex || null,
+          variantImageUrl: item.variant?.imageUrl || null,
         })),
         total,
+        discount,
+        shippingFee,
+        promoCode: promoCode?.code || null,
         status: 'pending',
         createdAt: serverTimestamp(),
       };
@@ -35,14 +56,22 @@ export const ordersService = {
           const productDoc = await transaction.get(productRef);
           
           if (!productDoc.exists()) {
-            throw new Error(`Product not found: ${item.product.name}`);
+            throw new Error(`Produit introuvable : ${item.product.name}`);
           }
           
           const currentStock = productDoc.data().stock;
           if (currentStock < item.quantity) {
-            throw new Error(`Insufficient stock for product: ${item.product.name}`);
+            throw new Error(`Stock insuffisant pour : ${item.product.name}`);
           }
           stockById.set(item.product.id, currentStock);
+        }
+
+        // Increment promo usage if applicable
+        if (promoCode) {
+          const promoRef = doc(db, PROMO_COLLECTION, promoCode.id);
+          transaction.update(promoRef, {
+            usageCount: increment(1)
+          });
         }
 
         // Create the order
@@ -89,27 +118,6 @@ export const ordersService = {
     }
   },
 
-  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
-    try {
-      const allowed: OrderStatus[] = ['pending', 'paid', 'preparing', 'shipped', 'done'];
-      if (!allowed.includes(status)) {
-        throw new Error(`Invalid order status: ${status}`);
-      }
-      const orderRef = doc(db, ORDERS_COLLECTION, orderId);
-      await updateDoc(orderRef, { status, updatedAt: serverTimestamp() });
-      
-      const updatedDoc = await getDoc(orderRef);
-      return {
-        id: updatedDoc.id,
-        ...updatedDoc.data(),
-        createdAt: updatedDoc.data().createdAt?.toDate() || new Date(),
-      } as Order;
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      throw error;
-    }
-  },
-
   async getOrderById(orderId: string): Promise<Order | null> {
     try {
       const orderRef = doc(db, ORDERS_COLLECTION, orderId);
@@ -125,7 +133,28 @@ export const ordersService = {
       
       return null;
     } catch (error) {
-      console.error('Error getting order:', error);
+      console.error('Error getting order by id:', error);
+      throw error;
+    }
+  },
+
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
+    try {
+      const allowed: OrderStatus[] = ['pending', 'paid', 'preparing', 'shipped', 'done'];
+      if (!allowed.includes(status)) {
+        throw new Error(`Statut de commande invalide : ${status}`);
+      }
+      const orderRef = doc(db, ORDERS_COLLECTION, orderId);
+      await updateDoc(orderRef, { status, updatedAt: serverTimestamp() });
+      
+      const updatedDoc = await getDoc(orderRef);
+      return {
+        id: updatedDoc.id,
+        ...updatedDoc.data(),
+        createdAt: updatedDoc.data().createdAt?.toDate() || new Date(),
+      } as Order;
+    } catch (error) {
+      console.error('Error updating order status:', error);
       throw error;
     }
   },

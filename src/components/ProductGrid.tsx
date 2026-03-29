@@ -10,7 +10,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No products available</p>
+        <p className="text-gray-900 text-lg font-bold mb-1">Aucun produit trouvé</p>
+        <p className="text-gray-600 text-sm">Essayez de modifier la recherche ou la catégorie.</p>
       </div>
     );
   }

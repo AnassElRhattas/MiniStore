@@ -14,10 +14,11 @@ describe('CheckoutForm', () => {
     it('should render form with all fields', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/delivery address/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /place order/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/ville/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/nom complet/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/téléphone/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/adresse de livraison/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /confirmer la commande/i })).toBeInTheDocument();
     });
 
     it('should render form with proper styling', () => {
@@ -33,13 +34,14 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        expect(screen.getByText(/name is required/i)).toBeInTheDocument();
-        expect(screen.getByText(/phone number is required/i)).toBeInTheDocument();
-        expect(screen.getByText(/address is required/i)).toBeInTheDocument();
+        expect(screen.getByText(/la ville est obligatoire/i)).toBeInTheDocument();
+        expect(screen.getByText(/le nom est obligatoire/i)).toBeInTheDocument();
+        expect(screen.getByText(/le numéro est obligatoire/i)).toBeInTheDocument();
+        expect(screen.getByText(/l'adresse est obligatoire/i)).toBeInTheDocument();
       });
       
       expect(mockOnSubmit).not.toHaveBeenCalled();
@@ -49,14 +51,14 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, 'J');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        expect(screen.getByText(/name must be at least 2 characters/i)).toBeInTheDocument();
+        expect(screen.getByText(/au moins 2 caractères/i)).toBeInTheDocument();
       });
       
       expect(mockOnSubmit).not.toHaveBeenCalled();
@@ -66,14 +68,14 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const phoneInput = screen.getByLabelText(/phone number/i);
+      const phoneInput = screen.getByLabelText(/téléphone/i);
       await user.type(phoneInput, '123');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        expect(screen.getByText(/phone number must be 8-12 digits/i)).toBeInTheDocument();
+        expect(screen.getByText(/entre 8 et 12 chiffres/i)).toBeInTheDocument();
       });
       
       expect(mockOnSubmit).not.toHaveBeenCalled();
@@ -83,14 +85,14 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const addressInput = screen.getByLabelText(/delivery address/i);
+      const addressInput = screen.getByLabelText(/adresse de livraison/i);
       await user.type(addressInput, '123');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        expect(screen.getByText(/address must be at least 10 characters/i)).toBeInTheDocument();
+        expect(screen.getByText(/min 10/i)).toBeInTheDocument();
       });
       
       expect(mockOnSubmit).not.toHaveBeenCalled();
@@ -100,20 +102,20 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const phoneInput = screen.getByLabelText(/phone number/i);
+      const phoneInput = screen.getByLabelText(/téléphone/i);
       await user.type(phoneInput, '12345678');
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, 'John Doe');
       
-      const addressInput = screen.getByLabelText(/delivery address/i);
+      const addressInput = screen.getByLabelText(/adresse de livraison/i);
       await user.type(addressInput, '123 Main Street, City, Country');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        expect(screen.queryByText(/phone number must be 8-12 digits/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/entre 8 et 12 chiffres/i)).not.toBeInTheDocument();
       });
     });
   });
@@ -123,16 +125,19 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const citySelect = screen.getByLabelText(/ville/i);
+      await user.selectOptions(citySelect, 'El Jadida');
+
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, 'John Doe');
       
-      const phoneInput = screen.getByLabelText(/phone number/i);
+      const phoneInput = screen.getByLabelText(/téléphone/i);
       await user.type(phoneInput, '12345678');
       
-      const addressInput = screen.getByLabelText(/delivery address/i);
+      const addressInput = screen.getByLabelText(/adresse de livraison/i);
       await user.type(addressInput, '123 Main Street, City, Country');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
@@ -140,6 +145,7 @@ describe('CheckoutForm', () => {
           name: 'John Doe',
           phone: '12345678',
           address: '123 Main Street, City, Country',
+          city: 'El Jadida',
         });
       });
     });
@@ -148,16 +154,19 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const citySelect = screen.getByLabelText(/ville/i);
+      await user.selectOptions(citySelect, 'El Jadida');
+
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, '  John Doe  ');
       
-      const phoneInput = screen.getByLabelText(/phone number/i);
+      const phoneInput = screen.getByLabelText(/téléphone/i);
       await user.type(phoneInput, '  12345678  ');
       
-      const addressInput = screen.getByLabelText(/delivery address/i);
+      const addressInput = screen.getByLabelText(/adresse de livraison/i);
       await user.type(addressInput, '  123 Main Street  ');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
@@ -165,6 +174,7 @@ describe('CheckoutForm', () => {
           name: 'John Doe',
           phone: '12345678',
           address: '123 Main Street',
+          city: 'El Jadida',
         });
       });
     });
@@ -174,23 +184,24 @@ describe('CheckoutForm', () => {
     it('should disable form when loading', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={true} />);
       
-      expect(screen.getByLabelText(/full name/i)).toBeDisabled();
-      expect(screen.getByLabelText(/phone number/i)).toBeDisabled();
-      expect(screen.getByLabelText(/delivery address/i)).toBeDisabled();
-      expect(screen.getByRole('button', { name: /processing order/i })).toBeDisabled();
+      expect(screen.getByLabelText(/ville/i)).toBeDisabled();
+      expect(screen.getByLabelText(/nom complet/i)).toBeDisabled();
+      expect(screen.getByLabelText(/téléphone/i)).toBeDisabled();
+      expect(screen.getByLabelText(/adresse de livraison/i)).toBeDisabled();
+      expect(screen.getByRole('button', { name: /traitement/i })).toBeDisabled();
     });
 
     it('should show loading text on button when loading', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={true} />);
       
-      expect(screen.getByRole('button')).toHaveTextContent(/processing order/i);
+      expect(screen.getByRole('button')).toHaveTextContent(/traitement/i);
     });
 
     it('should have proper styling for loading button', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={true} />);
       
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('bg-gray-400', 'text-gray-200', 'cursor-not-allowed');
+      expect(button).toHaveClass('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
     });
   });
 
@@ -198,8 +209,8 @@ describe('CheckoutForm', () => {
     it('should have proper styling for normal button', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const button = screen.getByRole('button', { name: /place order/i });
-      expect(button).toHaveClass('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+      const button = screen.getByRole('button', { name: /confirmer la commande/i });
+      expect(button).toHaveClass('bg-primary', 'text-white', 'hover:bg-primary/90');
     });
   });
 
@@ -207,17 +218,18 @@ describe('CheckoutForm', () => {
     it('should have proper labels for all form fields', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/delivery address/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/ville/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/nom complet/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/téléphone/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/adresse de livraison/i)).toBeInTheDocument();
     });
 
     it('should have proper placeholder text', () => {
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      expect(screen.getByPlaceholderText(/enter your full name/i)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText(/enter your phone number/i)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText(/enter your complete delivery address/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/hamid el amrani/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/ex:\s*06/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/adresse complète/i)).toBeInTheDocument();
     });
   });
 
@@ -226,14 +238,14 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, 'J');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        expect(nameInput).toHaveClass('border-red-500');
+        expect(nameInput).toHaveClass('border-red-200');
       });
     });
 
@@ -241,15 +253,15 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, 'J');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
-        const errorMessage = screen.getByText(/name must be at least 2 characters/i);
-        expect(errorMessage).toHaveClass('mt-1', 'text-sm', 'text-red-600');
+        const errorMessage = screen.getByText(/au moins 2 caractères/i);
+        expect(errorMessage).toHaveClass('text-[10px]', 'font-black', 'text-red-500', 'uppercase', 'px-4');
       });
     });
   });
@@ -258,18 +270,21 @@ describe('CheckoutForm', () => {
     it('should handle very long names', async () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
+
+      const citySelect = screen.getByLabelText(/ville/i);
+      await user.selectOptions(citySelect, 'El Jadida');
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const nameInput = screen.getByLabelText(/nom complet/i);
       const longName = 'A'.repeat(100);
       await user.type(nameInput, longName);
       
-      const phoneInput = screen.getByLabelText(/phone number/i);
+      const phoneInput = screen.getByLabelText(/téléphone/i);
       await user.type(phoneInput, '12345678');
       
-      const addressInput = screen.getByLabelText(/delivery address/i);
+      const addressInput = screen.getByLabelText(/adresse de livraison/i);
       await user.type(addressInput, '123 Main Street, City, Country');
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
@@ -277,6 +292,7 @@ describe('CheckoutForm', () => {
           name: longName,
           phone: '12345678',
           address: '123 Main Street, City, Country',
+          city: 'El Jadida',
         });
       });
     });
@@ -285,17 +301,20 @@ describe('CheckoutForm', () => {
       const user = userEvent.setup();
       render(<CheckoutForm onSubmit={mockOnSubmit} isLoading={false} />);
       
-      const nameInput = screen.getByLabelText(/full name/i);
+      const citySelect = screen.getByLabelText(/ville/i);
+      await user.selectOptions(citySelect, 'El Jadida');
+
+      const nameInput = screen.getByLabelText(/nom complet/i);
       await user.type(nameInput, 'John Doe');
       
-      const phoneInput = screen.getByLabelText(/phone number/i);
+      const phoneInput = screen.getByLabelText(/téléphone/i);
       await user.type(phoneInput, '12345678');
       
-      const addressInput = screen.getByLabelText(/delivery address/i);
+      const addressInput = screen.getByLabelText(/adresse de livraison/i);
       const specialAddress = '123 Main St, Apt #4, City - State, ZIP 12345';
       await user.type(addressInput, specialAddress);
       
-      const submitButton = screen.getByRole('button', { name: /place order/i });
+      const submitButton = screen.getByRole('button', { name: /confirmer la commande/i });
       await user.click(submitButton);
       
       await waitFor(() => {
@@ -303,6 +322,7 @@ describe('CheckoutForm', () => {
           name: 'John Doe',
           phone: '12345678',
           address: specialAddress,
+          city: 'El Jadida',
         });
       });
     });

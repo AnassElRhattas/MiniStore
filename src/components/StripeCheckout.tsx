@@ -60,7 +60,7 @@ const CheckoutForm: React.FC<{
       onPaymentSuccess(paymentIntentId);
       
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Payment failed';
+      const errorMessage = err instanceof Error ? err.message : 'Paiement échoué';
       setError(errorMessage);
       onPaymentError(errorMessage);
     } finally {
@@ -72,13 +72,13 @@ const CheckoutForm: React.FC<{
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Card Information
+          Informations de carte
         </label>
         <div className="border border-gray-300 rounded-md p-3 bg-white">
           {/* This is a mock implementation */}
           <div className="text-sm text-gray-600">
-            <p>Stripe Card Element would appear here</p>
-            <p className="text-xs mt-1">Mock implementation - no real payment processing</p>
+            <p>Le formulaire Stripe apparaîtrait ici</p>
+            <p className="text-xs mt-1">Démo (mock) — aucun paiement réel</p>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@ const CheckoutForm: React.FC<{
         disabled={!stripe || isProcessing}
         className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
-        {isProcessing ? 'Processing...' : `Pay ${total.toFixed(2)} DH`}
+        {isProcessing ? 'Traitement...' : `Payer ${total.toFixed(2)} DH`}
       </button>
     </form>
   );
@@ -137,7 +137,7 @@ export const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       
     } catch (error) {
       console.error('Stripe checkout error:', error);
-      onPaymentError('Failed to create checkout session');
+      onPaymentError('Impossible de créer la session de paiement.');
     } finally {
       setIsLoading(false);
     }
@@ -146,10 +146,9 @@ export const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   return (
     <div className="space-y-4">
       <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-        <h3 className="text-lg font-semibold text-blue-900 mb-2">Stripe Payment Integration</h3>
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">Paiement Stripe</h3>
         <p className="text-sm text-blue-700 mb-4">
-          This is a mock implementation of Stripe payment processing. 
-          In a production environment, this would integrate with real Stripe services.
+          Ceci est une implémentation de démonstration. En production, elle s’appuie sur les services Stripe.
         </p>
         
         <div className="flex gap-4">
@@ -158,14 +157,14 @@ export const StripeCheckout: React.FC<StripeCheckoutProps> = ({
             disabled={isLoading}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Creating Session...' : 'Use Stripe Checkout'}
+            {isLoading ? 'Création...' : 'Ouvrir Stripe Checkout'}
           </button>
           
           <button
             onClick={() => setUseStripeCheckout(true)}
             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
           >
-            Use Embedded Checkout
+            Checkout intégré
           </button>
         </div>
       </div>
@@ -184,15 +183,14 @@ export const StripeCheckout: React.FC<StripeCheckoutProps> = ({
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
         <p className="text-sm text-yellow-700">
-          <strong>Note:</strong> This is a demonstration implementation. 
-          To enable real payments, you would need to:
+          <strong>Note :</strong> ceci est une démonstration. Pour activer de vrais paiements :
         </p>
         <ul className="text-sm text-yellow-700 mt-2 list-disc list-inside">
-          <li>Set up a Stripe account</li>
-          <li>Add your Stripe publishable key to environment variables</li>
-          <li>Implement backend Cloud Functions for payment processing</li>
-          <li>Configure webhook endpoints for payment events</li>
-          <li>Enable real payment methods in Stripe Dashboard</li>
+          <li>Créer un compte Stripe</li>
+          <li>Ajouter la clé publishable Stripe aux variables d’environnement</li>
+          <li>Implémenter des Cloud Functions backend</li>
+          <li>Configurer les webhooks Stripe</li>
+          <li>Activer les moyens de paiement dans Stripe</li>
         </ul>
       </div>
     </div>
@@ -215,12 +213,12 @@ export const useStripePayment = () => {
       return {
         success: true,
         paymentIntentId: `pi_${Date.now()}`,
-        message: 'Payment processed successfully'
+        message: 'Paiement réussi'
       };
     } else {
       return {
         success: false,
-        error: 'Payment declined. Please try a different payment method.'
+        error: 'Paiement refusé. Veuillez réessayer.'
       };
     }
   };
